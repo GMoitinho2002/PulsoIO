@@ -1,0 +1,22 @@
+@PulsoIO.Api_HostAddress = http://localhost:5143
+
+GET {{PulsoIO.Api_HostAddress}}/health
+Accept: application/json
+
+###
+
+GET {{PulsoIO.Api_HostAddress}}/openapi/v1.json
+Accept: application/json
+
+###
+
+POST {{PulsoIO.Api_HostAddress}}/api/identity/auth/refresh
+Content-Type: application/json
+X-Pulso-CSRF: 1
+
+{}
+
+###
+
+GET {{PulsoIO.Api_HostAddress}}/api/identity/users
+Accept: application/json

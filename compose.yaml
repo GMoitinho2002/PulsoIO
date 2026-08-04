@@ -1,0 +1,27 @@
+﻿services:
+  database:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: pulsoio
+      POSTGRES_USER: pulsoio
+      POSTGRES_PASSWORD: ${PULSOIO_DB_PASSWORD:?Defina PULSOIO_DB_PASSWORD no arquivo .env}
+    ports: ["5432:5432"]
+    volumes: [postgres-data:/var/lib/postgresql/data]
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U pulsoio -d pulsoio"], interval: 5s, timeout: 5s, retries: 10 }
+  api:
+    build: { context: ., dockerfile: Dockerfile.api }
+    environment:
+      ASPNETCORE_HTTP_PORTS: 8080
+      ConnectionStrings__Database: Host=database;Port=5432;Database=pulsoio;Username=pulsoio;Password=${PULSOIO_DB_PASSWORD:?Defina PULSOIO_DB_PASSWORD no arquivo .env}
+      Authentication__Jwt__SigningKey: ${PULSOIO_JWT_SIGNING_KEY:?Defina PULSOIO_JWT_SIGNING_KEY no arquivo .env}
+      Authentication__InitialAdmin__Name: ${PULSOIO_INITIAL_ADMIN_NAME:?Defina PULSOIO_INITIAL_ADMIN_NAME no arquivo .env}
+      Authentication__InitialAdmin__Email: ${PULSOIO_INITIAL_ADMIN_EMAIL:?Defina PULSOIO_INITIAL_ADMIN_EMAIL no arquivo .env}
+      Authentication__InitialAdmin__Password: ${PULSOIO_INITIAL_ADMIN_PASSWORD:?Defina PULSOIO_INITIAL_ADMIN_PASSWORD no arquivo .env}
+      FrontendUrl: http://localhost:4200
+    ports: ["8080:8080"]
+    depends_on: { database: { condition: service_healthy } }
+  web:
+    build: { context: ., dockerfile: Dockerfile.web }
+    ports: ["4200:80"]
+    depends_on: [api]
+volumes: { postgres-data: {} }

@@ -1,0 +1,79 @@
+<div class="app-shell">
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <a class="brand" routerLink="/" aria-label="Pulso I/O — início">
+      <img class="brand-symbol" src="assets/brand/pulso-io-symbol.png" alt="">
+      <img class="brand-wordmark" src="assets/brand/pulso-io-wordmark.png" alt="Pulso I/O">
+    </a>
+
+    <div class="topbar-actions">
+      <div class="environment-badge">
+        <span class="environment-dot"></span>
+        Ambiente local
+      </div>
+      <a class="login-action" routerLink="/login">Entrar</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="eyebrow-line"></span>Observabilidade para integrações</p>
+        <h1 id="hero-title">A saúde das suas <span>integrações.</span></h1>
+        <p class="hero-description">
+          Visibilidade operacional, diagnóstico técnico e rastreabilidade para cada dado que entra ou sai dos seus sistemas.
+        </p>
+
+        <div class="hero-actions">
+          <button
+            class="primary-action"
+            type="button"
+            [disabled]="apiHealth().state === 'checking'"
+            (click)="refreshHealth()">
+            <span>Verificar sistema</span>
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" /></svg>
+          </button>
+          <a class="secondary-action" href="/swagger" target="_blank" rel="noreferrer">Documentação da API</a>
+        </div>
+
+        <div
+          class="api-status"
+          [class.is-online]="apiHealth().state === 'online'"
+          [class.is-degraded]="apiHealth().state === 'degraded'"
+          [class.is-offline]="apiHealth().state === 'offline'"
+          aria-live="polite">
+          <span class="status-indicator" aria-hidden="true"><span></span></span>
+          <span class="status-copy"><strong>{{ statusLabel() }}</strong><small>{{ statusDetail() }}</small></span>
+        </div>
+      </div>
+
+      <div class="signal-stage" aria-label="Representação visual do fluxo bidirecional de integrações">
+        <div class="stage-grid" aria-hidden="true"></div>
+        <div class="orbit orbit-outer" aria-hidden="true"></div>
+        <div class="orbit orbit-inner" aria-hidden="true"></div>
+        <div class="signal-core"><img src="assets/brand/pulso-io-symbol.png" alt="Símbolo Pulso I/O"></div>
+        <div class="flow-card flow-in"><span class="flow-icon" aria-hidden="true">↓</span><span><small>Entrada</small><strong>Recebida</strong></span></div>
+        <div class="flow-card flow-out"><span class="flow-icon" aria-hidden="true">↑</span><span><small>Saída</small><strong>Consumida</strong></span></div>
+        <div class="telemetry-chip chip-trace"><span></span>Trace conectado</div>
+        <div class="telemetry-chip chip-latency">Latência</div>
+      </div>
+    </section>
+
+    <section class="capabilities" aria-labelledby="capabilities-title">
+      <div class="section-heading"><div><p>Uma leitura completa</p><h2 id="capabilities-title">Mais do que estar online.</h2></div></div>
+      <div class="capability-grid">
+        <article><span class="capability-number">01</span><div><h3>Disponibilidade</h3><p>Saiba se o endpoint está acessível e respondendo dentro do esperado.</p></div></article>
+        <article><span class="capability-number">02</span><div><h3>Fluxo</h3><p>Confirme se os dados estão realmente entrando e saindo dos sistemas.</p></div></article>
+        <article><span class="capability-number">03</span><div><h3>Transação</h3><p>Encontre o ponto exato de cada falha com contexto técnico e operacional.</p></div></article>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <img src="assets/brand/pulso-io-wordmark.png" alt="Pulso I/O">
+    <p>Entrada. Saída. Cada transação.</p>
+    <span>© 2026 Pulso I/O</span>
+  </footer>
+</div>

@@ -1,0 +1,26 @@
+{
+  "/health": {
+    "target": "http://localhost:5143",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "warn"
+  },
+  "/api": {
+    "target": "http://localhost:5143",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "warn"
+  },
+  "/swagger": {
+    "target": "http://localhost:5143",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "warn"
+  },
+  "/openapi": {
+    "target": "http://localhost:5143",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "warn"
+  }
+}

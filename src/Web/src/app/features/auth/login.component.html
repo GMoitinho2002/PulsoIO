@@ -1,0 +1,96 @@
+<main class="login-page">
+  <div class="ambient" aria-hidden="true"></div>
+
+  <a class="brand" routerLink="/" aria-label="Voltar para o início do Pulso I/O">
+    <img src="assets/brand/pulso-io-symbol.png" alt="">
+    <img src="assets/brand/pulso-io-wordmark.png" alt="Pulso I/O">
+  </a>
+
+  <section class="login-layout" aria-labelledby="login-title">
+    <div class="login-intro">
+      <p class="eyebrow"><span></span>Área administrativa</p>
+      <h1>Visibilidade começa com acesso <em>seguro.</em></h1>
+      <p>Entre para acompanhar a saúde, o fluxo e cada transação das suas integrações.</p>
+      <div class="security-note">
+        <span aria-hidden="true">✓</span>
+        <div><strong>Sessão protegida</strong><small>Seu acesso é renovado por cookie seguro e o token não é salvo no navegador.</small></div>
+      </div>
+    </div>
+
+    <div class="login-card">
+      <div class="card-heading">
+        <span class="card-mark"><img src="assets/brand/pulso-io-symbol.png" alt=""></span>
+        <div><p>Bem-vindo de volta</p><h2 id="login-title">Entrar no Pulso I/O</h2></div>
+      </div>
+
+      @if (logoutNotice()) {
+        <div class="session-warning" [class.is-success]="logoutRevoked()" role="status">
+          <span aria-hidden="true">{{ logoutRevoked() ? '✓' : 'i' }}</span>
+          <div>
+            <p>{{ logoutNotice() }}</p>
+            @if (!logoutRevoked()) {
+              <button type="button" (click)="retryLogout()" [disabled]="retryingLogout()">
+                {{ retryingLogout() ? 'Tentando…' : 'Tentar revogar novamente' }}
+              </button>
+            }
+          </div>
+        </div>
+      }
+
+      <form
+        [formGroup]="form"
+        (ngSubmit)="submit()"
+        [attr.aria-busy]="submitting()"
+        novalidate>
+        <div class="field">
+          <label for="email">E-mail</label>
+          <input
+            #emailInput
+            id="email"
+            type="email"
+            formControlName="email"
+            autocomplete="username"
+            inputmode="email"
+            placeholder="seu@email.com"
+            [attr.aria-invalid]="form.controls.email.invalid && form.controls.email.touched"
+            [attr.aria-describedby]="form.controls.email.invalid && form.controls.email.touched ? 'email-error' : null">
+          @if (form.controls.email.invalid && form.controls.email.touched) {
+            <small id="email-error" class="field-error">Informe um e-mail válido.</small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="password">Senha</label>
+          <input
+            #passwordInput
+            id="password"
+            type="password"
+            formControlName="password"
+            autocomplete="current-password"
+            placeholder="Digite sua senha"
+            [attr.aria-invalid]="form.controls.password.invalid && form.controls.password.touched"
+            [attr.aria-describedby]="form.controls.password.invalid && form.controls.password.touched ? 'password-error' : null">
+          @if (form.controls.password.invalid && form.controls.password.touched) {
+            <small id="password-error" class="field-error">Informe sua senha.</small>
+          }
+        </div>
+
+        @if (errorMessage()) {
+          <div class="form-error" role="alert"><span aria-hidden="true">!</span>{{ errorMessage() }}</div>
+        }
+
+        <button type="submit" [disabled]="submitting()">
+          @if (submitting()) {
+            <span class="spinner" aria-hidden="true"></span><span>Entrando…</span>
+          } @else {
+            <span>Entrar com segurança</span><span aria-hidden="true">→</span>
+          }
+        </button>
+      </form>
+
+      <p class="support-copy">Acesso inicial reservado ao administrador do Pulso I/O.</p>
+    </div>
+  </section>
+
+  <p class="footer-copy">© 2026 Pulso I/O · A saúde das suas integrações.</p>
+</main>

@@ -1,0 +1,21 @@
+<div class="dashboard-page">
+  <section class="welcome" aria-labelledby="dashboard-title">
+    <div>
+      <p class="eyebrow">Visão geral</p>
+      <h1 id="dashboard-title">Olá, {{ user()?.name || 'usuário' }}.</h1>
+      <p>Seu ambiente está pronto para acompanhar a saúde das suas integrações.</p>
+    </div>
+    <span class="session-badge"><i></i>Sessão protegida</span>
+  </section>
+
+  <section class="metrics" aria-label="Resumo do ambiente">
+    <article><span class="metric-icon">01</span><div><small>Clientes</small><strong>—</strong><p>Cadastros entram no próximo passo.</p></div></article>
+    <article><span class="metric-icon">02</span><div><small>Integrações</small><strong>—</strong><p>Entrada e saída em uma só visão.</p></div></article>
+    <article><span class="metric-icon">03</span><div><small>Estado geral</small><strong class="neutral">Sem dados</strong><p>Aguardando a primeira telemetria.</p></div></article>
+  </section>
+
+  <section class="next-step">
+    <div class="next-copy"><span>Próxima etapa</span><h2>Estrutura administrativa</h2><p>Clientes, ambientes e integrações formarão a base segura para o primeiro fluxo real de monitoramento.</p></div>
+    <div class="pulse-visual" aria-hidden="true"><img src="assets/brand/pulso-io-symbol.png" alt=""><span></span><span></span></div>
+  </section>
+</div>

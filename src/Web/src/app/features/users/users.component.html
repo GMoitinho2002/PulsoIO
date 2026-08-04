@@ -1,0 +1,162 @@
+<section class="users-page" aria-labelledby="users-title">
+  <header class="page-heading">
+    <div>
+      <p>Administração</p>
+      <h1 id="users-title">Usuários</h1>
+      <span>Controle quem pode acessar o Pulso I/O e o estado de cada conta.</span>
+    </div>
+    <div class="summary" aria-label="Resumo dos usuários">
+      <strong>{{ users().length }}</strong><span>total</span>
+      <i></i>
+      <strong>{{ activeCount() }}</strong><span>ativos</span>
+    </div>
+  </header>
+
+  @if (feedback()) {
+    <div class="feedback" [class.is-error]="feedback()?.tone === 'error'" role="status">
+      <span aria-hidden="true">{{ feedback()?.tone === 'success' ? '✓' : '!' }}</span>
+      <p>{{ feedback()?.message }}</p>
+      <button type="button" aria-label="Fechar mensagem" (click)="feedback.set(null)">×</button>
+    </div>
+  }
+
+  <div class="users-layout">
+    <section class="list-card" aria-labelledby="list-title">
+      <div class="card-heading">
+        <div><h2 id="list-title">Contas cadastradas</h2><p>Ative ou desative o acesso sem remover o histórico.</p></div>
+        <button type="button" class="refresh-button" (click)="loadUsers()" [disabled]="loading()">
+          <span aria-hidden="true">↻</span>{{ loading() ? 'Atualizando…' : 'Atualizar' }}
+        </button>
+      </div>
+
+      <div class="search-row">
+        <label for="user-search" class="visually-hidden">Pesquisar usuários</label>
+        <span class="search-box">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m20.5 19-4.2-4.2a7.5 7.5 0 1 0-1.5 1.5l4.2 4.2 1.5-1.5ZM5.5 10.5a5 5 0 1 1 10 0 5 5 0 0 1-10 0Z" /></svg>
+          <input id="user-search" type="search" [formControl]="searchControl" autocomplete="off" placeholder="Pesquisar por nome, e-mail, cliente ou status">
+          @if (searchControl.value) {
+            <button type="button" aria-label="Limpar pesquisa" (click)="clearSearch()">×</button>
+          }
+        </span>
+        @if (!loading() && !loadError()) {
+          <small aria-live="polite">{{ filteredUsers().length }} de {{ users().length }} usuário(s)</small>
+        }
+      </div>
+
+      @if (loading()) {
+        <div class="loading-state" role="status"><span class="spinner" aria-hidden="true"></span>Carregando usuários…</div>
+      } @else if (loadError()) {
+        <div class="empty-state is-error" role="alert">
+          <span aria-hidden="true">!</span><h3>Falha ao carregar</h3><p>{{ loadError() }}</p>
+          <button type="button" (click)="loadUsers()">Tentar novamente</button>
+        </div>
+      } @else if (users().length === 0) {
+        <div class="empty-state"><span aria-hidden="true">◇</span><h3>Nenhum usuário cadastrado</h3><p>Crie a primeira conta usando o formulário ao lado.</p></div>
+      } @else if (filteredUsers().length === 0) {
+        <div class="empty-state"><span aria-hidden="true">⌕</span><h3>Nenhum resultado</h3><p>Não encontramos usuários para “{{ searchControl.value }}”. Tente outro nome, e-mail, cliente ou status.</p><button type="button" (click)="clearSearch()">Limpar pesquisa</button></div>
+      } @else {
+        <div class="table-scroll">
+          <table>
+            <caption>Usuários cadastrados no Pulso I/O</caption>
+            <thead><tr><th scope="col">Usuário</th><th scope="col">Cliente</th><th scope="col">Status</th><th scope="col"><span class="visually-hidden">Ações</span></th></tr></thead>
+            <tbody>
+              @for (user of filteredUsers(); track user.id) {
+                <tr>
+                  <td>
+                    <span class="user-avatar" aria-hidden="true">{{ user.name.charAt(0).toUpperCase() }}</span>
+                    <span class="user-copy"><strong>{{ user.name }} @if (isCurrentUser(user)) { <em>Você</em> }</strong><small>{{ user.email }}</small></span>
+                  </td>
+                  <td><span class="scope" [class.is-root]="user.isRoot || !user.clientId">{{ user.isRoot || !user.clientId ? 'Pulso I/O · Global' : user.clientName }}</span></td>
+                  <td><span class="status" [class.is-inactive]="!user.isActive"><i></i>{{ user.isActive ? 'Ativo' : 'Inativo' }}</span></td>
+                  <td>
+                    <button
+                      type="button"
+                      class="status-action"
+                      [class.activate]="!user.isActive"
+                      [disabled]="isCurrentUser(user) && user.isActive"
+                      [attr.title]="isCurrentUser(user) && user.isActive ? 'Você não pode desativar sua própria conta' : null"
+                      (click)="requestStatusChange(user, $event)">
+                      {{ user.isActive ? 'Desativar' : 'Ativar' }}
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+
+    <aside class="create-card" aria-labelledby="create-title">
+      <div class="card-heading"><div><h2 id="create-title">Novo usuário</h2><p>Crie uma conta de acesso ao workspace.</p></div></div>
+      <form [formGroup]="form" (ngSubmit)="createUser()" [attr.aria-busy]="saving()" novalidate>
+        <div class="field">
+          <label for="user-name">Nome</label>
+          <input #nameInput id="user-name" type="text" formControlName="name" autocomplete="name" placeholder="Nome completo" [attr.aria-invalid]="form.controls.name.invalid && form.controls.name.touched">
+          @if (form.controls.name.invalid && form.controls.name.touched) { <small class="field-error">Informe o nome do usuário.</small> }
+        </div>
+        <div class="field">
+          <label for="user-email">E-mail</label>
+          <input #emailInput id="user-email" type="email" formControlName="email" autocomplete="email" inputmode="email" placeholder="usuario@empresa.com" [attr.aria-invalid]="form.controls.email.invalid && form.controls.email.touched">
+          @if (form.controls.email.invalid && form.controls.email.touched) { <small class="field-error">Informe um e-mail válido.</small> }
+        </div>
+        <div class="field">
+          <label for="user-password">Senha inicial</label>
+          <input #passwordInput id="user-password" type="password" formControlName="password" autocomplete="new-password" placeholder="Crie uma senha segura" aria-describedby="password-help password-rules" [attr.aria-invalid]="form.controls.password.invalid && form.controls.password.touched">
+          <small id="password-help" class="field-help">Mínimo de 6 caracteres. Números são opcionais.</small>
+          <ul id="password-rules" class="password-rules" aria-label="Requisitos da senha">
+            <li [class.is-met]="passwordRequirements().minLength"><span>{{ passwordRequirements().minLength ? '✓' : '○' }}</span>6 ou mais caracteres</li>
+            <li [class.is-met]="passwordRequirements().uppercase"><span>{{ passwordRequirements().uppercase ? '✓' : '○' }}</span>Uma letra maiúscula</li>
+            <li [class.is-met]="passwordRequirements().lowercase"><span>{{ passwordRequirements().lowercase ? '✓' : '○' }}</span>Uma letra minúscula</li>
+            <li [class.is-met]="passwordRequirements().special"><span>{{ passwordRequirements().special ? '✓' : '○' }}</span>Um caractere especial</li>
+          </ul>
+        </div>
+        <div class="field">
+          <label for="user-client">Cliente</label>
+          <select id="user-client" formControlName="clientId">
+            <option [ngValue]="null">Pulso I/O — acesso global</option>
+            @for (client of activeClients(); track client.id) {
+              <option [value]="client.id">{{ client.name }}</option>
+            }
+          </select>
+          @if (clientsLoading()) {
+            <small class="field-help">Carregando clientes…</small>
+          } @else if (clientsError()) {
+            <small class="field-error">Não foi possível carregar os clientes. A conta será global.</small>
+            <button type="button" class="inline-action" (click)="loadClients()">Tentar novamente</button>
+          } @else {
+            <small class="field-help">Acesso global permite visualizar todos os clientes.</small>
+          }
+        </div>
+        <label class="toggle-field">
+          <input type="checkbox" formControlName="isActive">
+          <span class="toggle" aria-hidden="true"><i></i></span>
+          <span><strong>Criar como ativo</strong><small>O usuário poderá entrar imediatamente.</small></span>
+        </label>
+        <button class="submit-button" type="submit" [disabled]="saving()">
+          @if (saving()) { <span class="spinner" aria-hidden="true"></span>Criando… } @else { Criar usuário <span aria-hidden="true">→</span> }
+        </button>
+      </form>
+    </aside>
+  </div>
+</section>
+
+@if (confirmation(); as change) {
+  <div class="modal-backdrop">
+    <section class="confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-description">
+      <span class="dialog-icon" [class.activate]="change.isActive" aria-hidden="true">{{ change.isActive ? '↑' : '↓' }}</span>
+      <p>{{ change.isActive ? 'Ativar acesso' : 'Desativar acesso' }}</p>
+      <h2 id="confirm-title">{{ change.user.name }}</h2>
+      <span id="confirm-description">
+        @if (change.isActive) { Esta conta poderá entrar novamente no Pulso I/O. }
+        @else { Esta conta perderá o acesso e todas as sessões abertas serão encerradas. Seus dados e histórico serão preservados. }
+      </span>
+      <div class="dialog-actions">
+        <button type="button" class="cancel-button" (click)="cancelStatusChange()" [disabled]="changingStatus()">Cancelar</button>
+        <button #confirmAction type="button" class="confirm-button" [class.activate]="change.isActive" (click)="confirmStatusChange()" [disabled]="changingStatus()">
+          {{ changingStatus() ? 'Salvando…' : (change.isActive ? 'Confirmar ativação' : 'Confirmar desativação') }}
+        </button>
+      </div>
+    </section>
+  </div>
+}

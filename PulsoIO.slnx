@@ -1,0 +1,19 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/PulsoIO.Api/PulsoIO.Api.csproj" />
+  </Folder>
+  <Folder Name="/src/BuildingBlocks/">
+    <Project Path="src/BuildingBlocks/PulsoIO.BuildingBlocks/PulsoIO.BuildingBlocks.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/Administration/">
+    <Project Path="src/Modules/Administration/PulsoIO.Modules.Administration/PulsoIO.Modules.Administration.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Identity/">
+    <Project Path="src/Modules/Identity/PulsoIO.Modules.Identity/PulsoIO.Modules.Identity.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/PulsoIO.Modules.Administration.Tests/PulsoIO.Modules.Administration.Tests.csproj" />
+    <Project Path="tests/PulsoIO.Modules.Identity.Tests/PulsoIO.Modules.Identity.Tests.csproj" />
+  </Folder>
+</Solution>

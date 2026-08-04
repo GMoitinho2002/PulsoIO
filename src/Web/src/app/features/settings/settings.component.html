@@ -1,0 +1,17 @@
+<section class="settings-page" aria-labelledby="settings-title">
+  <header>
+    <p>Preferências</p>
+    <h1 id="settings-title">Configurações</h1>
+    <span>Informações da sua conta e preferências do workspace.</span>
+  </header>
+
+  <article>
+    <div class="article-heading"><span>Conta</span><small>Sessão atual</small></div>
+    <dl>
+      <div><dt>Nome</dt><dd>{{ user()?.name }}</dd></div>
+      <div><dt>E-mail</dt><dd>{{ user()?.email }}</dd></div>
+      <div><dt>Perfis</dt><dd>{{ user()?.roles?.join(', ') || 'Usuário' }}</dd></div>
+    </dl>
+    <p>Novas preferências pessoais serão adicionadas conforme os módulos do produto evoluírem.</p>
+  </article>
+</section>

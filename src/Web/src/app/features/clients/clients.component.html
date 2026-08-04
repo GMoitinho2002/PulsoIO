@@ -1,0 +1,118 @@
+<section class="clients-page" aria-labelledby="clients-title">
+  <header class="page-heading">
+    <div><p>Administração</p><h1 id="clients-title">Clientes</h1><span>Organize empresas, ambientes e o catálogo de integrações monitoradas.</span></div>
+    <div class="summary"><strong>{{ clients().length }}</strong><span>clientes</span><i></i><strong>{{ activeClientCount() }}</strong><span>ativos</span></div>
+  </header>
+
+  @if (feedback()) {
+    <div class="feedback" [class.is-error]="feedback()?.tone === 'error'" role="status">
+      <span aria-hidden="true">{{ feedback()?.tone === 'success' ? '✓' : '!' }}</span><p>{{ feedback()?.message }}</p>
+      <button type="button" aria-label="Fechar mensagem" (click)="feedback.set(null)">×</button>
+    </div>
+  }
+
+  <div class="client-workspace">
+    <aside class="client-list" aria-labelledby="client-list-title">
+      <div class="panel-heading"><div><h2 id="client-list-title">Organizações</h2><p>Selecione para configurar.</p></div><button type="button" class="icon-button" aria-label="Atualizar clientes" (click)="loadClients()" [disabled]="loading()">↻</button></div>
+
+      <form class="quick-create" [formGroup]="createClientForm" (ngSubmit)="createClient()" novalidate>
+        <label for="new-client-name">Novo cliente</label>
+        <div><input id="new-client-name" formControlName="name" placeholder="Nome da empresa" [attr.aria-invalid]="createClientForm.controls.name.invalid && createClientForm.controls.name.touched"><button type="submit" [disabled]="creatingClient()" aria-label="Cadastrar cliente">{{ creatingClient() ? '…' : '+' }}</button></div>
+        @if (createClientForm.controls.name.invalid && createClientForm.controls.name.touched) { <small>Informe o nome do cliente.</small> }
+      </form>
+
+      @if (loading()) {
+        <div class="list-state" role="status"><span class="spinner"></span>Carregando…</div>
+      } @else if (loadError()) {
+        <div class="list-state is-error" role="alert"><strong>Falha ao carregar</strong><span>{{ loadError() }}</span><button type="button" (click)="loadClients()">Tentar novamente</button></div>
+      } @else if (clients().length === 0) {
+        <div class="list-state"><strong>Nenhum cliente</strong><span>Cadastre a primeira empresa acima.</span></div>
+      } @else {
+        <div class="client-options">
+          @for (client of sortedClients(); track client.id) {
+            <button type="button" [class.is-selected]="selectedId() === client.id" (click)="selectClient(client.id)">
+              <span class="client-mark" aria-hidden="true">{{ client.name.charAt(0).toUpperCase() }}</span>
+              <span><strong>{{ client.name }}</strong><small>{{ client.environmentCount }} ambiente(s) · {{ client.integrationCount }} integração(ões)</small></span>
+              <i [class.is-inactive]="!client.isActive" [attr.aria-label]="client.isActive ? 'Ativo' : 'Inativo'"></i>
+            </button>
+          }
+        </div>
+      }
+    </aside>
+
+    <section class="detail-panel" aria-live="polite">
+      @if (detailLoading()) {
+        <div class="detail-state" role="status"><span class="spinner"></span>Preparando ambiente do cliente…</div>
+      } @else if (detailError()) {
+        <div class="detail-state is-error" role="alert"><strong>Não foi possível abrir o cliente</strong><span>{{ detailError() }}</span>@if (selectedId()) { <button type="button" (click)="retrySelectedClient()">Tentar novamente</button> }</div>
+      } @else if (!detail()) {
+        <div class="detail-state"><span class="empty-icon" aria-hidden="true">◇</span><strong>Selecione um cliente</strong><span>Ambientes e integrações aparecerão aqui.</span></div>
+      } @else if (detail(); as client) {
+        <form class="client-header" [formGroup]="clientForm" (ngSubmit)="saveClient()">
+          <div class="title-field"><label for="client-name">Nome do cliente</label><input id="client-name" formControlName="name" [attr.aria-invalid]="clientForm.controls.name.invalid && clientForm.controls.name.touched"></div>
+          <label class="toggle-field"><input type="checkbox" formControlName="isActive"><span class="toggle"><i></i></span><span><strong>Cliente ativo</strong><small>Disponível para novos vínculos.</small></span></label>
+          <button class="primary-button" type="submit" [disabled]="savingClient()">{{ savingClient() ? 'Salvando…' : 'Salvar cliente' }}</button>
+        </form>
+
+        <section class="configuration-section" aria-labelledby="environments-title">
+          <div class="section-heading"><div><span>01</span><div><h2 id="environments-title">Ambientes</h2><p>Produção, homologação e desenvolvimento do cliente.</p></div></div><strong>{{ client.environments.length }}</strong></div>
+          <div class="records-grid">
+            <div class="records-list">
+              @if (sortedEnvironments().length === 0) {
+                <div class="empty-records"><strong>Nenhum ambiente cadastrado</strong><span>Comece pelo ambiente usado no piloto.</span></div>
+              } @else {
+                @for (environment of sortedEnvironments(); track environment.id) {
+                  <article class="record-card">
+                    <span class="record-icon" aria-hidden="true">{{ environment.kind === 'Production' ? 'P' : environment.kind === 'Staging' ? 'H' : 'D' }}</span>
+                    <div><strong>{{ environment.name }}</strong><small>{{ kindLabel(environment.kind) }}</small></div>
+                    <span class="record-status" [class.is-inactive]="!environment.isActive">{{ environment.isActive ? 'Ativo' : 'Inativo' }}</span>
+                    <button type="button" (click)="editEnvironment(environment)">Editar</button>
+                  </article>
+                }
+              }
+            </div>
+            <form class="record-form" [formGroup]="environmentForm" (ngSubmit)="saveEnvironment()" novalidate>
+              <div class="form-heading"><div><span>{{ editingEnvironmentId() ? 'Editar' : 'Novo' }}</span><h3>Ambiente</h3></div>@if (editingEnvironmentId()) { <button type="button" (click)="cancelEnvironmentEdit()">Cancelar</button> }</div>
+              <label>Nome<input formControlName="name" placeholder="Ex.: Produção principal" [attr.aria-invalid]="environmentForm.controls.name.invalid && environmentForm.controls.name.touched"></label>
+              <label>Tipo<select formControlName="kind"><option value="Production">Produção</option><option value="Staging">Homologação</option><option value="Development">Desenvolvimento</option></select></label>
+              <label class="compact-toggle"><input type="checkbox" formControlName="isActive"><span></span>Ambiente ativo</label>
+              <button class="primary-button" type="submit" [disabled]="savingEnvironment()">{{ savingEnvironment() ? 'Salvando…' : (editingEnvironmentId() ? 'Atualizar ambiente' : 'Cadastrar ambiente') }}</button>
+            </form>
+          </div>
+        </section>
+
+        <section class="configuration-section" aria-labelledby="integrations-title">
+          <div class="section-heading"><div><span>02</span><div><h2 id="integrations-title">Integrações</h2><p>Mapeie os fluxos que farão parte da observabilidade.</p></div></div><strong>{{ client.integrations.length }}</strong></div>
+          <div class="records-grid integrations-grid">
+            <div class="records-list">
+              @if (client.environments.length === 0) {
+                <div class="empty-records"><strong>Cadastre um ambiente primeiro</strong><span>Toda integração precisa pertencer a um ambiente.</span></div>
+              } @else if (sortedIntegrations().length === 0) {
+                <div class="empty-records"><strong>Nenhuma integração cadastrada</strong><span>Mapeie o primeiro fluxo do piloto ao lado.</span></div>
+              } @else {
+                @for (integration of sortedIntegrations(); track integration.id) {
+                  <article class="record-card integration-card">
+                    <span class="record-icon" aria-hidden="true">↔</span>
+                    <div><strong>{{ integration.name }}</strong><small>{{ integration.sourceSystem }} → {{ integration.targetSystem }}</small><em>{{ environmentName(integration.environmentId) }} · {{ directionLabel(integration.direction) }}</em></div>
+                    <span class="record-status" [class.is-inactive]="!integration.isActive">{{ integration.isActive ? 'Ativa' : 'Inativa' }}</span>
+                    <button type="button" (click)="editIntegration(integration)">Editar</button>
+                  </article>
+                }
+              }
+            </div>
+            <form class="record-form integration-form" [formGroup]="integrationForm" (ngSubmit)="saveIntegration()" novalidate>
+              <div class="form-heading"><div><span>{{ editingIntegrationId() ? 'Editar' : 'Nova' }}</span><h3>Integração</h3></div>@if (editingIntegrationId()) { <button type="button" (click)="cancelIntegrationEdit()">Cancelar</button> }</div>
+              <label>Nome<input formControlName="name" placeholder="Ex.: Pedidos para faturamento"></label>
+              <label>Ambiente<select formControlName="environmentId"><option value="" disabled>Selecione</option>@for (environment of sortedEnvironments(); track environment.id) { <option [value]="environment.id">{{ environment.name }}</option> }</select></label>
+              <label>Direção<select formControlName="direction"><option value="Inbound">Entrada</option><option value="Outbound">Saída</option><option value="Bidirectional">Bidirecional</option></select></label>
+              <div class="form-row"><label>Sistema de origem<input formControlName="sourceSystem" placeholder="Origem"></label><label>Sistema de destino<input formControlName="targetSystem" placeholder="Destino"></label></div>
+              <div class="form-row"><label>Método HTTP <small>opcional</small><input formControlName="httpMethod" placeholder="POST"></label><label>Padrão de endpoint <small>opcional</small><input formControlName="endpointPattern" placeholder="/api/pedidos/{id}"></label></div>
+              <label class="compact-toggle"><input type="checkbox" formControlName="isActive"><span></span>Integração ativa</label>
+              <button class="primary-button" type="submit" [disabled]="savingIntegration() || client.environments.length === 0">{{ savingIntegration() ? 'Salvando…' : (editingIntegrationId() ? 'Atualizar integração' : 'Cadastrar integração') }}</button>
+            </form>
+          </div>
+        </section>
+      }
+    </section>
+  </div>
+</section>
