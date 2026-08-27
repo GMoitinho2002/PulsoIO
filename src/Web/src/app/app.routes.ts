@@ -37,6 +37,19 @@ export const routes: Routes = [
           import('./features/users/users.component').then(module => module.UsersComponent)
       },
       {
+        path: 'clients',
+        title: 'Clientes — Pulso I/O',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/clients/clients.component').then(module => module.ClientsComponent)
+      },
+      {
+        path: 'profile',
+        title: 'Meu perfil — Pulso I/O',
+        loadComponent: () =>
+          import('./features/profile/profile.component').then(module => module.ProfileComponent)
+      },
+      {
         path: 'settings',
         title: 'Configurações — Pulso I/O',
         loadComponent: () =>

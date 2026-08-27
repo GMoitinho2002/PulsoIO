@@ -62,7 +62,7 @@ export class UsersComponent implements OnInit {
   readonly form = new FormGroup({
     name: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required, Validators.maxLength(150)]
+      validators: [Validators.required, Validators.minLength(2), Validators.maxLength(150)]
     }),
     email: new FormControl('', {
       nonNullable: true,
@@ -73,7 +73,7 @@ export class UsersComponent implements OnInit {
       validators: [Validators.required, passwordPolicyValidator]
     }),
     isActive: new FormControl(true, { nonNullable: true }),
-    clientId: new FormControl<string | null>(null)
+    clientId: new FormControl<string | null>(this.auth.user()?.clientId ?? null)
   });
 
   private readonly passwordValue = toSignal(this.form.controls.password.valueChanges, {
@@ -92,6 +92,12 @@ export class UsersComponent implements OnInit {
     this.clients()
       .filter(client => client.isActive)
       .sort((left, right) => left.name.localeCompare(right.name, 'pt-BR'))
+  );
+  readonly isRootAdministrator = computed(() => this.auth.user()?.isRoot === true);
+  readonly assignedClientName = computed(() =>
+    this.clients().find(client => client.id === this.auth.user()?.clientId)?.name ??
+      this.auth.user()?.clientName ??
+      'Cliente vinculado'
   );
   readonly filteredUsers = computed(() => {
     const query = this.normalize(this.searchValue()).trim();
@@ -129,7 +135,12 @@ export class UsersComponent implements OnInit {
       .list()
       .pipe(finalize(() => this.clientsLoading.set(false)))
       .subscribe({
-        next: clients => this.clients.set(clients),
+        next: clients => {
+          this.clients.set(clients);
+          if (!this.isRootAdministrator()) {
+            this.form.controls.clientId.setValue(this.auth.user()?.clientId ?? null);
+          }
+        },
         error: () => this.clientsError.set(true)
       });
   }

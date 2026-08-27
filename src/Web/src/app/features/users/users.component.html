@@ -113,19 +113,29 @@
         </div>
         <div class="field">
           <label for="user-client">Cliente</label>
-          <select id="user-client" formControlName="clientId">
-            <option [ngValue]="null">Pulso I/O — acesso global</option>
-            @for (client of activeClients(); track client.id) {
-              <option [value]="client.id">{{ client.name }}</option>
-            }
-          </select>
+          @if (isRootAdministrator()) {
+            <select id="user-client" formControlName="clientId">
+              <option [ngValue]="null">Pulso I/O — acesso global</option>
+              @for (client of activeClients(); track client.id) {
+                <option [value]="client.id">{{ client.name }}</option>
+              }
+            </select>
+          } @else {
+            <div id="user-client" class="readonly-scope">{{ assignedClientName() }}</div>
+          }
           @if (clientsLoading()) {
             <small class="field-help">Carregando clientes…</small>
           } @else if (clientsError()) {
-            <small class="field-error">Não foi possível carregar os clientes. A conta será global.</small>
+            <small class="field-error">
+              {{ isRootAdministrator()
+                ? 'Não foi possível carregar os clientes. Somente o escopo global está disponível.'
+                : 'Não foi possível confirmar os dados do cliente vinculado.' }}
+            </small>
             <button type="button" class="inline-action" (click)="loadClients()">Tentar novamente</button>
-          } @else {
+          } @else if (isRootAdministrator()) {
             <small class="field-help">Acesso global permite visualizar todos os clientes.</small>
+          } @else {
+            <small class="field-help">Novas contas permanecem no mesmo cliente da sua administração.</small>
           }
         </div>
         <label class="toggle-field">

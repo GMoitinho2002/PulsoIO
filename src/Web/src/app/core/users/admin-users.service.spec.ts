@@ -24,7 +24,17 @@ describe('AdminUsersService', () => {
 
   it('lista usuários pelo endpoint administrativo', async () => {
     const users: AdminUser[] = [
-      { id: 'user-1', name: 'Gustavo', email: 'gustavo@example.com', isActive: true }
+      {
+        id: 'user-1',
+        name: 'Gustavo',
+        email: 'gustavo@example.com',
+        isActive: true,
+        roles: ['Admin'],
+        clientId: null,
+        clientName: null,
+        isRoot: true,
+        hasProfilePhoto: false
+      }
     ];
     const result = firstValueFrom(service.list());
     const request = controller.expectOne('/api/identity/users');
@@ -39,9 +49,20 @@ describe('AdminUsersService', () => {
       name: 'Ana Silva',
       email: 'ana@example.com',
       password: 'Segura!',
-      isActive: true
+      isActive: true,
+      clientId: null
     };
-    const created: AdminUser = { id: 'user-2', ...body };
+    const created: AdminUser = {
+      id: 'user-2',
+      name: body.name,
+      email: body.email,
+      isActive: body.isActive,
+      roles: [],
+      clientId: body.clientId,
+      clientName: null,
+      isRoot: true,
+      hasProfilePhoto: false
+    };
     const result = firstValueFrom(service.create(body));
     const request = controller.expectOne('/api/identity/users');
 
@@ -56,7 +77,12 @@ describe('AdminUsersService', () => {
       id: 'user-2',
       name: 'Ana Silva',
       email: 'ana@example.com',
-      isActive: false
+      isActive: false,
+      roles: [],
+      clientId: null,
+      clientName: null,
+      isRoot: true,
+      hasProfilePhoto: false
     };
     const result = firstValueFrom(service.updateStatus('user-2', false));
     const request = controller.expectOne('/api/identity/users/user-2/status');

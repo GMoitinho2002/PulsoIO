@@ -28,6 +28,14 @@ public sealed record UpdateIntegrationRequest(
     string? EndpointPattern,
     bool IsActive);
 
+public sealed record AdministrationOverviewResponse(
+    int TotalClients,
+    int ActiveClients,
+    int TotalEnvironments,
+    int ActiveEnvironments,
+    int TotalIntegrations,
+    int ActiveIntegrations);
+
 public sealed record ClientListItemResponse(
     Guid Id,
     string Name,

@@ -84,6 +84,7 @@ form { display: flex; flex-direction: column; gap: 1rem; padding: 1.35rem 1.4rem
 .field input[aria-invalid='true'] { border-color: var(--color-danger); }
 .field-help { color: var(--color-muted); font-size: 0.62rem; }
 .field-error { color: var(--color-danger); font-size: 0.65rem; }
+.readonly-scope { display: flex; min-height: 42px; align-items: center; padding: 0.65rem 0.75rem; border: 1px solid var(--color-border); border-radius: 9px; background: rgba(14, 15, 20, 0.45); color: var(--color-muted); font-size: 0.72rem; }
 .inline-action { align-self: flex-start; padding: 0; background: transparent; color: var(--color-violet-soft); cursor: pointer; font-size: 0.62rem; font-weight: 700; }
 .password-rules { display: grid; grid-template-columns: 1fr 1fr; gap: 0.38rem 0.6rem; margin: 0.25rem 0 0; padding: 0; list-style: none; color: #777680; font-size: 0.6rem; }
 .password-rules li { display: flex; align-items: center; gap: 0.35rem; }

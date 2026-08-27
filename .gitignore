@@ -6,3 +6,4 @@
 .tmp/
 .vs/
 .env
+debug.log

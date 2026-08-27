@@ -15,13 +15,23 @@ describe('UsersComponent', () => {
     id: 'current-user',
     name: 'Gustavo',
     email: 'gustavo@example.com',
-    isActive: true
+    isActive: true,
+    roles: ['Admin'],
+    clientId: null,
+    clientName: null,
+    isRoot: true,
+    hasProfilePhoto: false
   };
   const otherUser: AdminUser = {
     id: 'other-user',
     name: 'Ana',
     email: 'ana@example.com',
-    isActive: true
+    isActive: true,
+    roles: [],
+    clientId: null,
+    clientName: null,
+    isRoot: true,
+    hasProfilePhoto: false
   };
 
   let fixture: ComponentFixture<UsersComponent>;
@@ -51,6 +61,7 @@ describe('UsersComponent', () => {
     component = fixture.componentInstance;
     fixture.detectChanges();
     controller.expectOne('/api/identity/users').flush([currentUser, otherUser]);
+    controller.expectOne('/api/administration/clients').flush([]);
     fixture.detectChanges();
   });
 

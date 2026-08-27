@@ -5,17 +5,46 @@
       <h1 id="dashboard-title">Olá, {{ user()?.name || 'usuário' }}.</h1>
       <p>Seu ambiente está pronto para acompanhar a saúde das suas integrações.</p>
     </div>
-    <span class="session-badge"><i></i>Sessão protegida</span>
+    <span class="session-badge" [class.is-offline]="health().state === 'offline'">
+      <i></i>
+      @switch (health().state) {
+        @case ('checking') { Verificando API… }
+        @case ('online') { API disponível }
+        @case ('degraded') { API degradada }
+        @case ('offline') { API indisponível }
+      }
+    </span>
   </section>
 
   <section class="metrics" aria-label="Resumo do ambiente">
-    <article><span class="metric-icon">01</span><div><small>Clientes</small><strong>—</strong><p>Cadastros entram no próximo passo.</p></div></article>
-    <article><span class="metric-icon">02</span><div><small>Integrações</small><strong>—</strong><p>Entrada e saída em uma só visão.</p></div></article>
-    <article><span class="metric-icon">03</span><div><small>Estado geral</small><strong class="neutral">Sem dados</strong><p>Aguardando a primeira telemetria.</p></div></article>
+    <article>
+      <span class="metric-icon">01</span>
+      <div><small>Clientes</small><strong>{{ loading() ? '…' : (overview()?.totalClients ?? '—') }}</strong><p>{{ overview()?.activeClients ?? 0 }} ativo(s) no seu escopo.</p></div>
+    </article>
+    <article>
+      <span class="metric-icon">02</span>
+      <div><small>Ambientes</small><strong>{{ loading() ? '…' : (overview()?.totalEnvironments ?? '—') }}</strong><p>{{ overview()?.activeEnvironments ?? 0 }} preparado(s) para integrações.</p></div>
+    </article>
+    <article>
+      <span class="metric-icon">03</span>
+      <div><small>Integrações</small><strong>{{ loading() ? '…' : (overview()?.totalIntegrations ?? '—') }}</strong><p>{{ overview()?.activeIntegrations ?? 0 }} ativa(s) no catálogo.</p></div>
+    </article>
   </section>
 
+  @if (loadError()) {
+    <div class="dashboard-feedback" role="alert">
+      <span>Não foi possível carregar o resumo administrativo.</span>
+      <button type="button" (click)="load()">Tentar novamente</button>
+    </div>
+  }
+
   <section class="next-step">
-    <div class="next-copy"><span>Próxima etapa</span><h2>Estrutura administrativa</h2><p>Clientes, ambientes e integrações formarão a base segura para o primeiro fluxo real de monitoramento.</p></div>
+    <div class="next-copy">
+      <span>Monitoramento</span>
+      <h2>Aguardando a primeira telemetria</h2>
+      <p>O catálogo administrativo está disponível. O próximo marco do produto conectará eventos reais às integrações para calcular saúde, histórico e alertas.</p>
+      @if (isAdmin()) { <a routerLink="/app/clients">Gerenciar clientes e integrações</a> }
+    </div>
     <div class="pulse-visual" aria-hidden="true"><img src="assets/brand/pulso-io-symbol.png" alt=""><span></span><span></span></div>
   </section>
 </div>

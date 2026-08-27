@@ -10,7 +10,7 @@ namespace PulsoIO.Modules.Administration.Tests;
 public sealed class AdministrationEndpointContractTests
 {
     [Fact]
-    public void MapsEveryAdministrativeRouteWithAdminPolicy()
+    public void MapsAdministrativeRoutesWithTheExpectedAuthorization()
     {
         var builder = WebApplication.CreateBuilder();
         builder.Services.AddScoped<AdministrationDbContext>(_ => null!);
@@ -27,7 +27,8 @@ public sealed class AdministrationEndpointContractTests
             .Select(endpoint => endpoint.RoutePattern.RawText)
             .ToHashSet(StringComparer.Ordinal);
 
-        Assert.Equal(8, routes.Length);
+        Assert.Equal(9, routes.Length);
+        Assert.Contains("/api/administration/overview", patterns);
         Assert.Contains("/api/administration/clients/", patterns);
         Assert.Contains("/api/administration/clients/{clientId:guid}", patterns);
         Assert.Contains(
@@ -42,7 +43,13 @@ public sealed class AdministrationEndpointContractTests
         Assert.Contains(
             "/api/administration/clients/{clientId:guid}/integrations/{integrationId:guid}",
             patterns);
-        Assert.All(routes, route => Assert.Contains(
+        var overview = Assert.Single(routes, route =>
+            route.RoutePattern.RawText == "/api/administration/overview");
+        Assert.Contains(
+            overview.Metadata.GetOrderedMetadata<IAuthorizeData>(),
+            authorization => string.IsNullOrEmpty(authorization.Policy));
+
+        Assert.All(routes.Where(route => route != overview), route => Assert.Contains(
             route.Metadata.GetOrderedMetadata<IAuthorizeData>(),
             authorization => authorization.Policy == "Admin"));
     }

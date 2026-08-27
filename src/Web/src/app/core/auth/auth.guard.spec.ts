@@ -57,7 +57,11 @@ describe('adminGuard', () => {
         id: '624b9ce9-4446-477c-a80d-ad1958d846bc',
         name: 'Gustavo',
         email: 'gustavo@example.com',
-        roles
+        roles,
+        clientId: null,
+        clientName: null,
+        isRoot: true,
+        hasProfilePhoto: false
       }
     };
 

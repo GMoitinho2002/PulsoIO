@@ -62,7 +62,7 @@ export class ClientsComponent implements OnInit {
   readonly createClientForm = new FormGroup({
     name: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required, Validators.maxLength(160)]
+      validators: [Validators.required, Validators.minLength(2), Validators.maxLength(150)]
     }),
     isActive: new FormControl(true, { nonNullable: true })
   });
@@ -70,7 +70,7 @@ export class ClientsComponent implements OnInit {
   readonly clientForm = new FormGroup({
     name: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required, Validators.maxLength(160)]
+      validators: [Validators.required, Validators.minLength(2), Validators.maxLength(150)]
     }),
     isActive: new FormControl(true, { nonNullable: true })
   });
@@ -78,7 +78,7 @@ export class ClientsComponent implements OnInit {
   readonly environmentForm = new FormGroup({
     name: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required, Validators.maxLength(160)]
+      validators: [Validators.required, Validators.minLength(2), Validators.maxLength(100)]
     }),
     kind: new FormControl<EnvironmentKind>('Production', { nonNullable: true }),
     isActive: new FormControl(true, { nonNullable: true })
@@ -87,17 +87,17 @@ export class ClientsComponent implements OnInit {
   readonly integrationForm = new FormGroup({
     name: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required, Validators.maxLength(160)]
+      validators: [Validators.required, Validators.minLength(2), Validators.maxLength(150)]
     }),
     environmentId: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     direction: new FormControl<IntegrationDirection>('Bidirectional', { nonNullable: true }),
     sourceSystem: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required, Validators.maxLength(160)]
+      validators: [Validators.required, Validators.maxLength(150)]
     }),
     targetSystem: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required, Validators.maxLength(160)]
+      validators: [Validators.required, Validators.maxLength(150)]
     }),
     httpMethod: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(16)] }),
     endpointPattern: new FormControl('', {

@@ -16,6 +16,16 @@ internal static class AdministrationEndpoints
 
     public static IEndpointRouteBuilder Map(IEndpointRouteBuilder endpoints)
     {
+        endpoints.MapGet("/api/administration/overview", GetOverviewAsync)
+            .WithName("GetAdministrationOverview")
+            .WithSummary("Obtém os totais administrativos acessíveis ao usuário.")
+            .WithTags("Administration overview")
+            .AddEndpointFilter<AdministrationNoStoreEndpointFilter>()
+            .RequireAuthorization()
+            .Produces<AdministrationOverviewResponse>()
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden);
+
         var clients = endpoints
             .MapGroup("/api/administration/clients")
             .WithTags("Client administration")
@@ -97,6 +107,38 @@ internal static class AdministrationEndpoints
             .Produces(StatusCodes.Status404NotFound);
 
         return endpoints;
+    }
+
+    private static async Task<IResult> GetOverviewAsync(
+        AdministrationDbContext database,
+        ClaimsPrincipal principal,
+        CancellationToken cancellationToken)
+    {
+        var scope = TenantScope.From(principal);
+        if (!scope.IsValid)
+        {
+            return Results.Forbid();
+        }
+
+        var clients = database.Clients.AsNoTracking();
+        var environments = database.Environments.AsNoTracking();
+        var integrations = database.Integrations.AsNoTracking();
+        if (scope.ClientId is { } clientId)
+        {
+            clients = clients.Where(client => client.Id == clientId);
+            environments = environments.Where(environment => environment.ClientId == clientId);
+            integrations = integrations.Where(integration => integration.ClientId == clientId);
+        }
+
+        var response = new AdministrationOverviewResponse(
+            await clients.CountAsync(cancellationToken),
+            await clients.CountAsync(client => client.IsActive, cancellationToken),
+            await environments.CountAsync(cancellationToken),
+            await environments.CountAsync(environment => environment.IsActive, cancellationToken),
+            await integrations.CountAsync(cancellationToken),
+            await integrations.CountAsync(integration => integration.IsActive, cancellationToken));
+
+        return Results.Ok(response);
     }
 
     private static async Task<IResult> ListClientsAsync(

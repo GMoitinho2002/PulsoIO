@@ -56,6 +56,19 @@ dotnet tool run dotnet-ef database update `
   --context IdentityDbContext
 ```
 
+Para aplicar as migrations do módulo Administration:
+
+```powershell
+$env:ASPNETCORE_ENVIRONMENT = "Development"
+dotnet tool run dotnet-ef database update `
+  --project .\src\Modules\Administration\PulsoIO.Modules.Administration\PulsoIO.Modules.Administration.csproj `
+  --startup-project .\src\PulsoIO.Api\PulsoIO.Api.csproj `
+  --context AdministrationDbContext
+```
+
+Os dois contextos usam o mesmo banco PostgreSQL, mas mantêm schemas e históricos de
+migrations separados. Em uma instalação nova, aplique ambos antes de iniciar a API.
+
 ### Administrador inicial
 
 Configure nome, e-mail e senha sem exibir a senha no terminal:
@@ -111,6 +124,9 @@ Endereços locais:
 - login: `http://localhost:4200/login`;
 - painel autenticado: `http://localhost:4200/app`;
 - gestão de usuários, exclusiva para administradores: `http://localhost:4200/app/users`;
+- gestão de clientes, ambientes e integrações, exclusiva para administradores:
+  `http://localhost:4200/app/clients`;
+- perfil do usuário autenticado: `http://localhost:4200/app/profile`;
 - estado da API: `http://localhost:5143/health`;
 - Swagger UI: `http://localhost:5143/swagger`;
 - OpenAPI: `http://localhost:5143/openapi/v1.json`.

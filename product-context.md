@@ -532,6 +532,11 @@ pulso-io/
   minúscula e um caractere especial; números são opcionais.
 - Administradores podem listar, criar, ativar e desativar usuários. Contas novas são comuns
   por padrão e não recebem automaticamente o papel `Admin`.
+- Administradores raiz podem cadastrar clientes, ambientes e integrações; administradores
+  vinculados permanecem limitados ao próprio cliente, inclusive ao criar novas contas.
+- O dashboard autenticado apresenta totais reais de clientes, ambientes e integrações no
+  escopo do usuário, além da disponibilidade do processo da API. Estados de saúde continuam
+  sem dados até a implementação da ingestão de telemetria.
 - A desativação invalida imediatamente JWT e todos os refresh tokens do usuário; login,
   refresh e requisições autenticadas rejeitam contas inativas com resposta genérica.
 - Autodesativação, desativação do último administrador ativo e atualizações concorrentes de

@@ -49,7 +49,7 @@
         <div class="detail-state"><span class="empty-icon" aria-hidden="true">◇</span><strong>Selecione um cliente</strong><span>Ambientes e integrações aparecerão aqui.</span></div>
       } @else if (detail(); as client) {
         <form class="client-header" [formGroup]="clientForm" (ngSubmit)="saveClient()">
-          <div class="title-field"><label for="client-name">Nome do cliente</label><input id="client-name" formControlName="name" [attr.aria-invalid]="clientForm.controls.name.invalid && clientForm.controls.name.touched"></div>
+          <div class="title-field"><label for="client-name">Nome do cliente</label><input id="client-name" formControlName="name" [attr.aria-invalid]="clientForm.controls.name.invalid && clientForm.controls.name.touched">@if (clientForm.controls.name.invalid && clientForm.controls.name.touched) { <small class="field-error">Use entre 2 e 150 caracteres.</small> }</div>
           <label class="toggle-field"><input type="checkbox" formControlName="isActive"><span class="toggle"><i></i></span><span><strong>Cliente ativo</strong><small>Disponível para novos vínculos.</small></span></label>
           <button class="primary-button" type="submit" [disabled]="savingClient()">{{ savingClient() ? 'Salvando…' : 'Salvar cliente' }}</button>
         </form>
@@ -74,6 +74,7 @@
             <form class="record-form" [formGroup]="environmentForm" (ngSubmit)="saveEnvironment()" novalidate>
               <div class="form-heading"><div><span>{{ editingEnvironmentId() ? 'Editar' : 'Novo' }}</span><h3>Ambiente</h3></div>@if (editingEnvironmentId()) { <button type="button" (click)="cancelEnvironmentEdit()">Cancelar</button> }</div>
               <label>Nome<input formControlName="name" placeholder="Ex.: Produção principal" [attr.aria-invalid]="environmentForm.controls.name.invalid && environmentForm.controls.name.touched"></label>
+              @if (environmentForm.controls.name.invalid && environmentForm.controls.name.touched) { <small class="field-error">Use entre 2 e 100 caracteres.</small> }
               <label>Tipo<select formControlName="kind"><option value="Production">Produção</option><option value="Staging">Homologação</option><option value="Development">Desenvolvimento</option></select></label>
               <label class="compact-toggle"><input type="checkbox" formControlName="isActive"><span></span>Ambiente ativo</label>
               <button class="primary-button" type="submit" [disabled]="savingEnvironment()">{{ savingEnvironment() ? 'Salvando…' : (editingEnvironmentId() ? 'Atualizar ambiente' : 'Cadastrar ambiente') }}</button>
@@ -102,10 +103,12 @@
             </div>
             <form class="record-form integration-form" [formGroup]="integrationForm" (ngSubmit)="saveIntegration()" novalidate>
               <div class="form-heading"><div><span>{{ editingIntegrationId() ? 'Editar' : 'Nova' }}</span><h3>Integração</h3></div>@if (editingIntegrationId()) { <button type="button" (click)="cancelIntegrationEdit()">Cancelar</button> }</div>
-              <label>Nome<input formControlName="name" placeholder="Ex.: Pedidos para faturamento"></label>
+              <label>Nome<input formControlName="name" placeholder="Ex.: Pedidos para faturamento" [attr.aria-invalid]="integrationForm.controls.name.invalid && integrationForm.controls.name.touched"></label>
+              @if (integrationForm.controls.name.invalid && integrationForm.controls.name.touched) { <small class="field-error">Use entre 2 e 150 caracteres.</small> }
               <label>Ambiente<select formControlName="environmentId"><option value="" disabled>Selecione</option>@for (environment of sortedEnvironments(); track environment.id) { <option [value]="environment.id">{{ environment.name }}</option> }</select></label>
               <label>Direção<select formControlName="direction"><option value="Inbound">Entrada</option><option value="Outbound">Saída</option><option value="Bidirectional">Bidirecional</option></select></label>
               <div class="form-row"><label>Sistema de origem<input formControlName="sourceSystem" placeholder="Origem"></label><label>Sistema de destino<input formControlName="targetSystem" placeholder="Destino"></label></div>
+              @if ((integrationForm.controls.sourceSystem.invalid || integrationForm.controls.targetSystem.invalid) && integrationForm.touched) { <small class="field-error">Informe origem e destino com até 150 caracteres.</small> }
               <div class="form-row"><label>Método HTTP <small>opcional</small><input formControlName="httpMethod" placeholder="POST"></label><label>Padrão de endpoint <small>opcional</small><input formControlName="endpointPattern" placeholder="/api/pedidos/{id}"></label></div>
               <label class="compact-toggle"><input type="checkbox" formControlName="isActive"><span></span>Integração ativa</label>
               <button class="primary-button" type="submit" [disabled]="savingIntegration() || client.environments.length === 0">{{ savingIntegration() ? 'Salvando…' : (editingIntegrationId() ? 'Atualizar integração' : 'Cadastrar integração') }}</button>
